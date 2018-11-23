@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">XMLParser</string>
+    <string name="downloading_label">Téléchargement en cours ...</string>
+
 </resources>
