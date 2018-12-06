@@ -8,30 +8,34 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText edtMain;
     private Button btnSearch;
     private RecyclerView rcvMain;
+    private DocumentAdapter documentAdapter ;
 
-    ArrayList<String> items = new ArrayList<>();
+    ArrayList<DocumentModel> items = new ArrayList<>();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        StringAdapter adapter;
+        //StringAdapter adapter;
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -39,12 +43,13 @@ public class MainActivity extends AppCompatActivity {
         edtMain = findViewById(R.id.edtMain);
         btnSearch = findViewById(R.id.btnSearch);
         rcvMain = findViewById(R.id.rcvMain);
-        adapter = new StringAdapter();
 
-
+        documentAdapter = new DocumentAdapter(this);
         rcvMain.setLayoutManager(new LinearLayoutManager(this));
-        rcvMain.setAdapter(adapter);
-        adapter.setItems(items);
+        rcvMain.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        rcvMain.setAdapter(documentAdapter);
+
+        //documentAdapter.setItems(items);
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "La chaine est vide", Toast.LENGTH_SHORT).show();
                 } else
                     startDownload(edtMain.getText().toString());
+
             }
         });
 

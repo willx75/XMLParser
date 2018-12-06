@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class StringAdapter extends RecyclerView.Adapter<StringAdapter.StringHolder> {
+/**public class StringAdapter extends RecyclerView.Adapter<StringAdapter.StringHolder> {
     private ArrayList<String> items;
 
     public void setItems(ArrayList<String> items) {
@@ -44,3 +44,4 @@ public class StringAdapter extends RecyclerView.Adapter<StringAdapter.StringHold
         }
     }
 }
+**/

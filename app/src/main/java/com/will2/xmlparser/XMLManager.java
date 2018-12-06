@@ -47,7 +47,7 @@ public class XMLManager {
         NodeList itemsNode = nodeChannel.getElementsByTagName("item");
         /**
          *on boucle pour recuperer tout les items, si tout ls element items sont present on les
-            mets dans la Node puis on les ajoutent
+         mets dans la Node puis on les ajoutent
          */
 
         for (int i = 0; i < itemsNode.getLength(); i++) {
