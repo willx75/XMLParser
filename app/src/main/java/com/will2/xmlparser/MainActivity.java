@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -28,9 +29,12 @@ public class MainActivity extends AppCompatActivity {
     private EditText edtMain;
     private Button btnSearch;
     private RecyclerView rcvMain;
-    private DocumentAdapter documentAdapter ;
+    private DocumentAdapter documentAdapter;
+    private String destinationFolder = "MPLRSS/";
 
-    ArrayList<DocumentModel> items = new ArrayList<>();
+    List<DocumentModel> items = new ArrayList<>();
+    List<Long> referenceId = new ArrayList<>();
+    String fileName;
 
 
     @Override
@@ -46,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         documentAdapter = new DocumentAdapter(this);
         rcvMain.setLayoutManager(new LinearLayoutManager(this));
-        rcvMain.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        rcvMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         rcvMain.setAdapter(documentAdapter);
 
         //documentAdapter.setItems(items);
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        registerReceiver(broadcastReceiver,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)); // au moment ou le systeme aura une action de download complete alors cela va appeler le BR passée en parametre(fin de telechargement)
+        registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)); // au moment ou le systeme aura une action de download complete alors cela va appeler le BR passée en parametre(fin de telechargement)
 
     }
 
@@ -83,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         request.setVisibleInDownloadsUi(true); // afficher dans le telechargement systeme
 
         String fileName = uri.getLastPathSegment(); // je recupère la derniere partie de l'url
-        request.setDestinationInExternalPublicDir("MPLRSS", fileName);// creation a la racine
+        request.setDestinationInExternalPublicDir(destinationFolder, fileName);// creation a la racine
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         if (downloadManager != null) {
             idDownload = downloadManager.enqueue(request); // ajouter le dl a la file d'attente une fois que le systeme le rend bon de le telecharger(ca marche comme une file)
@@ -97,14 +101,32 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show();
+            long refId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            referenceId.remove(referenceId);
+
+            try {
+                if (documentAdapter != null) {
+                    items = XMLManager.ParseXML(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + destinationFolder + "/" + fileName);
+                    Toast.makeText(context, items.size()+"", Toast.LENGTH_SHORT).show();
+                    documentAdapter.resetData(items);
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (referenceId.isEmpty()) {
+                Toast.makeText(context, "All downloads are finished", Toast.LENGTH_SHORT).show();
+
+
+            }
+
         }
     };
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
+        @Override
+        protected void onDestroy() {
+            super.onDestroy();
+            unregisterReceiver(broadcastReceiver);
+        }
     }
-}
 

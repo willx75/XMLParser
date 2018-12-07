@@ -13,5 +13,6 @@ class BaseXML {
 
     public final static int VERSION = 9 ;
     public final static String DB_NAME ="projet" ;
-    public final static String TABLE = "projet"
+    public final static String TABLE = "projet";
+
 }
