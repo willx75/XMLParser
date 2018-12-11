@@ -62,7 +62,7 @@ public class XMLManager {
                         //Chaque doc rss commencent pas title,description,link
 
                         title = element.getElementsByTagName("title").item(0).getTextContent();
-                        description = element.getElementsByTagName("description").item(0).getTextContent();
+                        //description = element.getElementsByTagName("description").item(0).getTextContent(); //les rss n'ont plus de champs descriptions
                         link = element.getElementsByTagName("link").item(0).getTextContent();
                     }
                 });

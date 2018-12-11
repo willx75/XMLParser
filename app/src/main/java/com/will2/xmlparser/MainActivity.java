@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private String destinationFolder = "MPLRSS/";
 
     List<DocumentModel> items = new ArrayList<>();
-    List<Long> referenceId = new ArrayList<>();
+    List<Long> referenceIds = new ArrayList<>();
     String fileName;
 
 
@@ -85,14 +85,16 @@ public class MainActivity extends AppCompatActivity {
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE); // pour voir la notification & pourcentage de telechargement
         request.setTitle(getString(R.string.downloading_label));
         request.setVisibleInDownloadsUi(true); // afficher dans le telechargement systeme
-
-        String fileName = uri.getLastPathSegment(); // je recupère la derniere partie de l'url
+        fileName = uri.getLastPathSegment(); // je recupère la derniere partie de l'url
         request.setDestinationInExternalPublicDir(destinationFolder, fileName);// creation a la racine
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         if (downloadManager != null) {
             idDownload = downloadManager.enqueue(request); // ajouter le dl a la file d'attente une fois que le systeme le rend bon de le telecharger(ca marche comme une file)
             Toast.makeText(this, "Installing...", Toast.LENGTH_SHORT).show();
         }
+
+        if(idDownload > 0)
+            referenceIds.add(idDownload);
 
     }
 
@@ -102,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show();
             long refId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-            referenceId.remove(referenceId);
+            referenceIds.remove(refId);
 
             try {
                 if (documentAdapter != null) {
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (referenceId.isEmpty()) {
+            if (referenceIds.isEmpty()) {
                 Toast.makeText(context, "All downloads are finished", Toast.LENGTH_SHORT).show();
 
 
