@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -14,10 +16,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
+
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.URI;
@@ -30,10 +32,13 @@ public class MainActivity extends AppCompatActivity {
     private Button btnSearch;
     private RecyclerView rcvMain;
     private DocumentAdapter documentAdapter;
+    private FloatingActionButton fab;
+
     private String destinationFolder = "MPLRSS/";
 
+
     List<DocumentModel> items = new ArrayList<>();
-    List<Long> referenceId = new ArrayList<>();
+    List<Long> referenceIds = new ArrayList<>();
     String fileName;
 
 
@@ -47,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         edtMain = findViewById(R.id.edtMain);
         btnSearch = findViewById(R.id.btnSearch);
         rcvMain = findViewById(R.id.rcvMain);
+        fab = findViewById(R.id.fabSave);
 
         documentAdapter = new DocumentAdapter(this);
         rcvMain.setLayoutManager(new LinearLayoutManager(this));
@@ -64,6 +70,21 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (TextUtils.isEmpty(edtMain.getText().toString())){
+
+                    return;
+                }
+                else {
+
+
+                }
+            }
+        });
+
 
         registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)); // au moment ou le systeme aura une action de download complete alors cela va appeler le BR passée en parametre(fin de telechargement)
 
@@ -85,14 +106,16 @@ public class MainActivity extends AppCompatActivity {
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE); // pour voir la notification & pourcentage de telechargement
         request.setTitle(getString(R.string.downloading_label));
         request.setVisibleInDownloadsUi(true); // afficher dans le telechargement systeme
-
-        String fileName = uri.getLastPathSegment(); // je recupère la derniere partie de l'url
+        fileName = uri.getLastPathSegment(); // je recupère la derniere partie de l'url
         request.setDestinationInExternalPublicDir(destinationFolder, fileName);// creation a la racine
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         if (downloadManager != null) {
             idDownload = downloadManager.enqueue(request); // ajouter le dl a la file d'attente une fois que le systeme le rend bon de le telecharger(ca marche comme une file)
             Toast.makeText(this, "Installing...", Toast.LENGTH_SHORT).show();
         }
+
+        if(idDownload > 0)
+            referenceIds.add(idDownload);
 
     }
 
@@ -102,11 +125,11 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "download finished", Toast.LENGTH_SHORT).show();
             long refId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-            referenceId.remove(referenceId);
+            referenceIds.remove(refId);
 
             try {
                 if (documentAdapter != null) {
-                    items = XMLManager.ParseXML(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + destinationFolder + "/" + fileName);
+                    items = XMLManager.ParseXML(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + destinationFolder + "/" + fileName); // chemin ou j'envoie mon doc telecharger sur mon telephone
                     Toast.makeText(context, items.size()+"", Toast.LENGTH_SHORT).show();
                     documentAdapter.resetData(items);
 
@@ -114,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (referenceId.isEmpty()) {
+            if (referenceIds.isEmpty()) {
                 Toast.makeText(context, "All downloads are finished", Toast.LENGTH_SHORT).show();
 
 
@@ -123,10 +146,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-        @Override
-        protected void onDestroy() {
-            super.onDestroy();
-            unregisterReceiver(broadcastReceiver);
-        }
-    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
+    }
+}

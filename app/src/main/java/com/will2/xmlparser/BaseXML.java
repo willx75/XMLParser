@@ -1,6 +1,7 @@
 package com.will2.xmlparser;
 
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -16,12 +17,11 @@ class BaseXML extends SQLiteOpenHelper {
     public final static String COLUMN_TITLE = "title";
     public final static String COLUMN_DESCRIPTION = "description";
 
-
     public final static String CREATE_FEED = "create table " + TABLE_FEED + "(" +
             COLUMN_ID + "integer not null primary key , " +
             COLUMN_URL + " string," +
             COLUMN_TITLE + "string, " +
-            COLUMN_DESCRIPTION + "string " + " )";
+            COLUMN_DESCRIPTION + "string " + ")";
 
     private static BaseXML ourInstance;
 
@@ -39,6 +39,12 @@ class BaseXML extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FEED);
+        ContentValues row = new ContentValues();
+        row.put(BaseXML.COLUMN_TITLE, "parisien");
+        row.put(BaseXML.COLUMN_DESCRIPTION, "journal");
+        row.put(BaseXML.COLUMN_URL, "ContentValues row  = new ContentValues() ; \n" +
+                "    row.put(BaseXML.C)");
+
     }
 
     @Override
@@ -48,4 +54,6 @@ class BaseXML extends SQLiteOpenHelper {
             onCreate(db);
         }
     }
+
+
 }

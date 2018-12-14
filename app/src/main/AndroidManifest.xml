@@ -25,7 +25,9 @@
             android:name=".XMLContentProvider"
             android:authorities="fr.will2.xmlparser"
             android:enabled="true"
-            android:exported="true"></provider>
+            android:exported="true" />
+
+        <activity android:name=".SaveURLActivity"></activity>
     </application>
 
 </manifest>

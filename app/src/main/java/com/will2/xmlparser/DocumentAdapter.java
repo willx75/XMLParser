@@ -59,7 +59,8 @@ class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentHolde
 
 
     class DocumentHolder extends RecyclerView.ViewHolder {
-        TextView txvTitle;
+
+        public TextView txvTitle;
         public TextView txvDescription;
         public TextView txvLink;
 

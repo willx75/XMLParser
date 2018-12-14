@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import static android.os.Build.ID;
+
 public class XMLContentProvider extends ContentProvider {
 
 
@@ -16,18 +18,22 @@ public class XMLContentProvider extends ContentProvider {
     private static String authority = "fr.will.xmlparser";
     private BaseXML baseXML;
     SQLiteDatabase sqLiteDatabase;
+
+    public static final String FEED_PATH = "XMLParser";
     private static final int FEED_TABLE = 1;
     private static final int FEED_LINK = 2;
-    private static final int FEED_DELETE = 3;
+    private static final int FEED_DESCRIPTION = 3;
+    private static final int FEED_TITLE = 4;
 
-    //  private static final int  = 2 ;
 
     private static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     {
-        matcher.addURI(authority, "feed_table", FEED_TABLE);
-        matcher.addURI(authority, "feed_link", FEED_LINK);
-        matcher.addURI(authority, "feed_delete", FEED_DELETE);
+        matcher.addURI(authority, FEED_PATH, FEED_TABLE);
+        matcher.addURI(authority, FEED_PATH, FEED_LINK);
+        matcher.addURI(authority, FEED_PATH, FEED_DESCRIPTION);
+        matcher.addURI(authority, FEED_PATH, FEED_TITLE);
+
     }
 
     public XMLContentProvider() {
@@ -59,18 +65,28 @@ public class XMLContentProvider extends ContentProvider {
         sqLiteDatabase = baseXML.getWritableDatabase();
         int code = matcher.match(uri);
         Log.d(TAG, "Uri" + uri.toString());
-        long id = 0;
+        long id;
         String path;
 
         switch (code) {
 
             case FEED_LINK:
                 id = sqLiteDatabase.insert("feed_table", null, values);
-                path = "feed_link";
+                path = FEED_PATH;
+                break;
+
+            case FEED_DESCRIPTION:
+                id = sqLiteDatabase.insert("feed_table", null, values);
+                path = FEED_PATH;
+                break;
+
+            case FEED_TITLE:
+                id = sqLiteDatabase.insert("feed_table", null, values);
+                path = FEED_PATH;
                 break;
 
             default:
-                throw new UnsupportedOperationException("Not yet implemented");
+                throw new UnsupportedOperationException("Failed to insert ");
 
 
         }
@@ -107,17 +123,28 @@ public class XMLContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        // TODO: Implement this to handle requests to update one or more rows.
+
+
+        long id = matcher.match(uri);
+
+        String path;
+        sqLiteDatabase = baseXML.getWritableDatabase();
+
+        try {
+            if (id < 0) {
+                int cursor = sqLiteDatabase.update(String.valueOf(XMLContentProvider.FEED_TABLE), values, selection, selectionArgs);
+            } else {
+                int cursor = sqLiteDatabase.update(String.valueOf(FEED_TABLE), values, BaseXML.COLUMN_ID + " =" + id, null);
+            }
+
+        } finally {
+            baseXML.close();
+        }
+
         throw new UnsupportedOperationException("Not yet implemented");
-
-
-
-
 
 
     }
 
 
-
-
-                }
+}
