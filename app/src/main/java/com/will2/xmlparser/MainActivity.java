@@ -26,6 +26,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.will2.xmlparser.FeedColumn.COLUMN_DESCRIPTION;
+import static com.will2.xmlparser.FeedColumn.COLUMN_TITLE;
+import static com.will2.xmlparser.FeedColumn.COLUMN_URL;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText edtMain;
@@ -148,9 +152,9 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean createFeed(String url, String title, String description){
         ContentValues values = new ContentValues();
-        values.put(BaseXML.COLUMN_URL, url);
-        values.put(BaseXML.COLUMN_TITLE, title);
-        values.put(BaseXML.COLUMN_DESCRIPTION, description);
+        values.put(COLUMN_URL, url);
+        values.put(COLUMN_TITLE, title);
+        values.put(COLUMN_DESCRIPTION, description);
         Uri uri = getContentResolver().insert(XMLContentProvider.CONTENT_URI, values);
 
         return uri != null;

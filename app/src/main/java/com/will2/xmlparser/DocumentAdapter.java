@@ -33,12 +33,15 @@ class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentHolde
 
         View view = LayoutInflater.from(recyclerview.getContext()).inflate(R.layout.items_cell, recyclerview, false);
 
-        return new DocumentHolder(view);
+        DocumentHolder holder = new DocumentHolder(view);
+
+
+        return holder;
 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull DocumentHolder documentHolder, int i) {
+    public void onBindViewHolder(@NonNull final DocumentHolder documentHolder, int i) {
 
         // on recupere l'element a la position i de la liste
         DocumentModel documentModel = listItems.get(i);
@@ -46,6 +49,19 @@ class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentHolde
         documentHolder.txvTitle.setText(documentModel.title);
         documentHolder.txvDescription.setText(documentModel.description);
         documentHolder.txvLink.setText(documentModel.link);
+
+        documentHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(documentHolder.txvLink.getVisibility() == View.VISIBLE){
+                    documentHolder.txvLink.setVisibility(View.GONE);
+                    documentHolder.txvDescription.setVisibility(View.GONE);
+                }else{
+                    documentHolder.txvLink.setVisibility(View.VISIBLE);
+                    documentHolder.txvDescription.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
     }
 

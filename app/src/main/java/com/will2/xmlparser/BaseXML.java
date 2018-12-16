@@ -6,16 +6,18 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import static com.will2.xmlparser.FeedColumn.COLUMN_DESCRIPTION;
+import static com.will2.xmlparser.FeedColumn.COLUMN_ID;
+import static com.will2.xmlparser.FeedColumn.COLUMN_TITLE;
+import static com.will2.xmlparser.FeedColumn.COLUMN_URL;
+
 class BaseXML extends SQLiteOpenHelper {
 
 
     private final static int VERSION = 1;
     public final static String DB_NAME = "XMLParser";
     public final static String TABLE_FEED = "FEED_TABLE";
-    public final static String COLUMN_ID = "id";
-    public final static String COLUMN_URL = "url";
-    public final static String COLUMN_TITLE = "title";
-    public final static String COLUMN_DESCRIPTION = "description";
+
 
     public final static String CREATE_FEED = "create table " + TABLE_FEED + "(" +
             COLUMN_ID + "integer not null primary key , " +

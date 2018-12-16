@@ -12,6 +12,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.will2.xmlparser.FeedColumn.COLUMN_DESCRIPTION;
+import static com.will2.xmlparser.FeedColumn.COLUMN_ID;
+import static com.will2.xmlparser.FeedColumn.COLUMN_TITLE;
+import static com.will2.xmlparser.FeedColumn.COLUMN_URL;
+
 public class SaveURLActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
@@ -65,10 +70,10 @@ public class SaveURLActivity extends AppCompatActivity {
 
     private Feed cursorToFeed(Cursor cursor) {
         Feed feed = new Feed();
-        feed.setId(cursor.getInt(cursor.getColumnIndex(BaseXML.COLUMN_ID)));
-        feed.setContent(cursor.getString(cursor.getColumnIndex(BaseXML.COLUMN_URL)));
-        feed.setDescription(cursor.getString(cursor.getColumnIndex(BaseXML.COLUMN_DESCRIPTION)));
-        feed.setTitle(cursor.getString(cursor.getColumnIndex(BaseXML.COLUMN_TITLE)));
+        feed.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_ID)));
+        feed.setContent(cursor.getString(cursor.getColumnIndex(COLUMN_URL)));
+        feed.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
+        feed.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
         return feed;
     }
 }

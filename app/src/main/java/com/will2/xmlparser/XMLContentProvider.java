@@ -12,6 +12,7 @@ import android.util.Log;
 import com.will2.xmlparser.BaseXML;
 
 import static android.os.Build.ID;
+import static com.will2.xmlparser.FeedColumn.COLUMN_ID;
 
 public class XMLContentProvider extends ContentProvider {
 
@@ -121,7 +122,7 @@ public class XMLContentProvider extends ContentProvider {
             return sqLiteDatabase.query(FEED_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
 
         } else {
-            return sqLiteDatabase.query(FEED_TABLE, projection, BaseXML.COLUMN_ID + " =" + id, selectionArgs, null, null, null);
+            return sqLiteDatabase.query(FEED_TABLE, projection, COLUMN_ID + " =" + id, selectionArgs, null, null, null);
         }
 
     }
@@ -138,7 +139,7 @@ public class XMLContentProvider extends ContentProvider {
             if (id > 0) {
                 cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, selection, selectionArgs);
             } else {
-                cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, BaseXML.COLUMN_ID + " =" + id, null);
+                cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, COLUMN_ID + " =" + id, null);
             }
         } catch (Exception e) {
             Log.d(GAG, "Update = " + e.getMessage());
