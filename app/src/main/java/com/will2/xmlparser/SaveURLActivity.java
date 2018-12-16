@@ -44,10 +44,14 @@ public class SaveURLActivity extends AppCompatActivity {
         recyclerView.setAdapter(saveURLAdapter);
 
 
-        Toast.makeText(this, getFeeds()+"", Toast.LENGTH_SHORT).show();
-
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        saveURLAdapter.setUrls(getFeeds());
+    }
 
     private List<Feed> getFeeds(){
         List<Feed> feeds = new ArrayList<>();

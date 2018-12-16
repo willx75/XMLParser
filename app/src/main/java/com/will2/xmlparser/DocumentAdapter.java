@@ -1,5 +1,7 @@
 package com.will2.xmlparser;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -44,7 +46,7 @@ class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentHolde
     public void onBindViewHolder(@NonNull final DocumentHolder documentHolder, int i) {
 
         // on recupere l'element a la position i de la liste
-        DocumentModel documentModel = listItems.get(i);
+        final DocumentModel documentModel = listItems.get(i);
 
         documentHolder.txvTitle.setText(documentModel.title);
         documentHolder.txvDescription.setText(documentModel.description);
@@ -60,6 +62,15 @@ class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentHolde
                     documentHolder.txvLink.setVisibility(View.VISIBLE);
                     documentHolder.txvDescription.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+
+        documentHolder.txvLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(documentModel.link));
+                activity.startActivity(intent);
             }
         });
 

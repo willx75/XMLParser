@@ -3,10 +3,14 @@ package com.will2.xmlparser;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.will2.xmlparser.BaseXML;
@@ -17,53 +21,69 @@ import static com.will2.xmlparser.FeedColumn.COLUMN_ID;
 public class XMLContentProvider extends ContentProvider {
 
 
-    private static final String TAG = "INSERTION";
-    private static final String GAG = "XMLContentProvider";
-    private static String authority = "fr.will.xmlparser";
-    SQLiteDatabase sqLiteDatabase;
-    private  BaseXML baseXML;
-
+    //2 URI de notre content provider, elle sera utilisé pour accéder au ContentProvider
     public static final Uri CONTENT_URI = Uri.parse("content://com.will2.xmlparser.xmlcontentprovider");
+    // Le Mime de notre content provider, la premiére partie est toujours identique
     public static final String CONTENT_PROVIDER_MIME = "vnd.android.cursor.item/vnd.will2.xmlparser.xmlcontentprovider";
-    public static final String FEED_TABLE = "FEED_TABLE";
+    public static final String TABLE_FEED = "FEED";
+    private static String DATABASE_NAME = "xmlparser.db";
+    private static final int DATABASE_VERSION = 1;
 
 
-    public XMLContentProvider() {
-    }
+    //3 Creation d'une inner class qui va gérer la base de donnée locale
+    private static class DatabaseHelper extends SQLiteOpenHelper {
 
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        //4 Commande sql pour la création de la base de données
+        private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_FEED + "(\n" +
+                ""
+                + FeedColumn.COLUMN_ID + " INTEGER primary key autoincrement,\n" +
+                ""
+                + FeedColumn.COLUMN_URL + " TEXT,\n" +
+                ""
+                + FeedColumn.COLUMN_TITLE + " TEXT,\n" +
+                ""
+                + FeedColumn.COLUMN_DESCRIPTION + " TEXT)";
 
-        sqLiteDatabase = baseXML.getWritableDatabase();
-        int updateID = 0;
-        long id = getId(uri);
 
-        String path;
-        try {
-            if (id > 0) {
-                updateID = sqLiteDatabase.delete(FEED_TABLE, selection, selectionArgs);
-            } else {
-
-                updateID = sqLiteDatabase.delete(FEED_TABLE, selection, selectionArgs);
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "delete uri = " + uri.toString());
-            throw new UnsupportedOperationException("Not yet implemented");
-
-        } finally {
-            sqLiteDatabase.close();
+        //5 Constructeur du SqlManager à partir du context, du nom de la base et de la version
+        public DatabaseHelper(Context context){
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
-        return updateID;
+
+        @Override
+        public void onCreate(SQLiteDatabase sqLiteDatabase) {
+            sqLiteDatabase.execSQL(DATABASE_CREATE);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_FEED);
+            onCreate(sqLiteDatabase);
+        }
+    }
+
+    //6 Creer une variable SqlManager
+    private DatabaseHelper dbHelper;
+
+
+    //7 instancier le dbHelper dans le OnCreate du ContentProvider
+    @Override
+    public boolean onCreate() {
+        dbHelper = new DatabaseHelper(getContext());
+        return true;
     }
 
 
+    //8 retourne le type de notre ContentProvider,ce qui correspond tout simplement à notre MIME
+    @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         return CONTENT_PROVIDER_MIME;
     }
 
-
-    private long getId(Uri uri) {
+    //9 Cette méthode nous permet de récupérer l’id de notre Uri
+    private long getId(Uri uri){
+        //Vu que les uri sont ecrit de cette façon Content://something/id alors je recupère la derniere partie de l'uri pour avoir l'id
         String lastPathSegment = uri.getLastPathSegment();
         if (lastPathSegment != null) {
             try {
@@ -75,82 +95,96 @@ public class XMLContentProvider extends ContentProvider {
         return -1;
     }
 
+    @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        sqLiteDatabase = baseXML.getWritableDatabase();
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
+        //récupérer une instance de la base de données en mode ecriture
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
         Uri insertUri = null;
-        long id = 0;
-
 
         try {
-            id = sqLiteDatabase.insertOrThrow(FEED_TABLE, null, values);
-            Log.d(GAG, "id de l'insertion" + id);
+            //Insert or Throw retourne l’id de l’insertion dans la base et -1 en cas d’échec de l’insertion.
+            long id = sqLiteDatabase.insertOrThrow(TABLE_FEED, null, contentValues);
+            Log.d("ContentProviderManager", "Id de l'insertion : "+id);
 
-            if (id == -1) {
+            if(id == -1){
                 throw new RuntimeException("Echec de l'insertion");
-
-            } else {
+            }
+            else{
                 insertUri = ContentUris.withAppendedId(uri, id);
             }
 
-        } catch (Exception e) {
-            Log.e(GAG, "Insert Exception : " + e.getMessage());
-
-        } finally {
+        }catch (Exception e){
+            Log.e("ContentProviderManager", "Insert Exception : " + e.getMessage());
+        }finally {
+            //toujours fermé la base qu'il y ai une exception ou pas
             sqLiteDatabase.close();
         }
-
 
         return insertUri;
     }
 
-
     @Override
-    public boolean onCreate() {
-        baseXML = BaseXML.getInstance(getContext());
-        return true;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
-
+    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
         long id = getId(uri);
+        int updateId = -1;
 
-        sqLiteDatabase = baseXML.getReadableDatabase();
-        if (id > 0) {
-            return sqLiteDatabase.query(FEED_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
-
-        } else {
-            return sqLiteDatabase.query(FEED_TABLE, projection, COLUMN_ID + " =" + id, selectionArgs, null, null, null);
-        }
-
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection,
-                      String[] selectionArgs) {
-
-        int cursor;
-        long id = getId(uri);
-        sqLiteDatabase = baseXML.getWritableDatabase();
-
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
         try {
-            if (id > 0) {
-                cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, selection, selectionArgs);
-            } else {
-                cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, COLUMN_ID + " =" + id, null);
+            //Si l’id est supérieur à 0, on supprime l’élément
+            if(id > 0){
+                updateId = sqLiteDatabase.delete(TABLE_FEED, s, strings);
             }
-        } catch (Exception e) {
-            Log.d(GAG, "Update = " + e.getMessage());
-
-            throw new UnsupportedOperationException("Not yet implemented");
-
-        } finally {
-            baseXML.close();
+            //Sinon on essaye de supprimer l’élement par son id
+            else{
+                updateId = sqLiteDatabase.delete(TABLE_FEED, FeedColumn.COLUMN_ID+"="+id, null);
+            }
+        }catch (Exception e){
+            Log.e("ContentProviderManager", "Delete Exception : " + e.getMessage());
+        }finally {
+            sqLiteDatabase.close();
         }
 
+        return updateId;
+    }
 
-        return cursor;
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
+        long id = getId(uri);
+        int updateId = -1;
+
+        SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
+        try {
+            //Si l’id est supérieur à 0, on met à jour l’élément
+            if(id > 0){
+                updateId = sqLiteDatabase.update(TABLE_FEED, contentValues, s, strings);
+            }
+            //Sinon on essaye à mettre à jour l’élement par sa valeur
+            else{
+                updateId = sqLiteDatabase.update(TABLE_FEED, contentValues, FeedColumn.COLUMN_ID+"="+id, null);
+            }
+        }catch (Exception e){
+            Log.e("ContentProviderManager", "Update Exception : " + e.getMessage());
+        }finally {
+            sqLiteDatabase.close();
+        }
+
+        return updateId;
+    }
+
+
+    // récupérer une donnée présente dans notre ContentProvider.
+    @Nullable
+    @Override
+    public Cursor query(@NonNull Uri uri, @Nullable String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+        long id = getId(uri);
+        SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+        if(id > 0){
+            Cursor cursor = sqLiteDatabase.query(TABLE_FEED, columns, selection, selectionArgs, null, null, sortOrder);
+            return cursor;
+        }else{
+            Cursor cursor = sqLiteDatabase.query(TABLE_FEED, columns, null, null, null, null, sortOrder);
+            return cursor;
+        }
     }
 }
