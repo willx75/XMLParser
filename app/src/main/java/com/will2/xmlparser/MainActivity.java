@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -134,9 +135,14 @@ public class MainActivity extends AppCompatActivity {
     };
     public void fabSaveClicked(View view){
 
-        for (DocumentModel item : items){
-            createFeed(item.link, item.title, item.description);
-        }
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                for (DocumentModel item : items){
+                    createFeed(item.link, item.title, item.description);
+                }
+            }
+        });
 
     }
 
