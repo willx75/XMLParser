@@ -2,6 +2,7 @@ package com.will2.xmlparser;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -70,7 +71,13 @@ public class SaveURLActivity extends AppCompatActivity {
                     }
                 }
 
-                saveURLAdapter.setUrls(searchFeed);
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        saveURLAdapter.setUrls(searchFeed);
+
+                    }
+                });
             }
         });
     }
@@ -79,13 +86,19 @@ public class SaveURLActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        saveURLAdapter.setUrls(getFeeds());
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                saveURLAdapter.setUrls(getFeeds());
+            }
+        });
     }
 
     private List<Feed> getFeeds(){
         List<Feed> feeds = new ArrayList<>();
         Cursor cursor = getContentResolver().query(XMLContentProvider.CONTENT_URI, null, null, null, null);
-        Toast.makeText(this, cursor.getCount()+"", Toast.LENGTH_SHORT).show();
+
+        if(cursor == null) return feeds;
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
