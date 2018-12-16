@@ -23,7 +23,7 @@
 
         <provider
             android:name=".XMLContentProvider"
-            android:authorities="fr.will2.xmlparser"
+            android:authorities="com.will2.xmlparser.xmlcontentprovider"
             android:enabled="true"
             android:exported="true" />
 

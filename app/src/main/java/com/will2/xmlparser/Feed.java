@@ -1,10 +1,12 @@
 package com.will2.xmlparser;
 
-public class Feed {
+public class    Feed {
 
 
     private long id;
     private String content;
+    private String description;
+    private String title;
 
     public long getId() {
         return id;
@@ -25,6 +27,22 @@ public class Feed {
     @Override
     public String toString() {
         return content;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
 

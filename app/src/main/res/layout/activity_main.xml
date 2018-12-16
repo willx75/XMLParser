@@ -18,10 +18,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtMain"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="8dp"
-        tools:listitem="@layout/item_document" />
+        app:layout_constraintTop_toBottomOf="@+id/edtMain" />
 
     <EditText
         android:id="@+id/edtMain"
@@ -36,19 +33,18 @@
         android:inputType="text"
         app:layout_constraintEnd_toStartOf="@+id/btnSearch"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-     />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@android:color/white"
+        android:layout_marginEnd="8dp"
         android:text="@string/search"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteY="16dp" />
 
@@ -57,15 +53,30 @@
         android:id="@+id/fabSave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
         android:layout_margin="15dp"
-        android:layout_marginEnd="16dp"
-        android:visibility="gone"
+        android:layout_marginEnd="56dp"
+        android:layout_marginBottom="11dp"
+        android:onClick="fabNextClicked"
+        android:src="@drawable/ic_next"
         app:backgroundTint="@color/design_default_color_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteY="455dp"
-        android:src="@android:drawable/ic_menu_save"
-        tools:visibility="visible" />
+        tools:ignore="MissingConstraints" />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabSaveAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="15dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginBottom="11dp"
+        android:onClick="fabSaveClicked"
+        android:src="@android:drawable/ic_menu_save"
+        app:backgroundTint="@color/design_default_color_primary"
+        app:layout_constraintBottom_toTopOf="@id/fabSave"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="MissingConstraints" />
 
 </android.support.constraint.ConstraintLayout>

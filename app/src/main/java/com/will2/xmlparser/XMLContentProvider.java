@@ -9,95 +9,104 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import com.will2.xmlparser.BaseXML;
+
 import static android.os.Build.ID;
 
 public class XMLContentProvider extends ContentProvider {
 
 
     private static final String TAG = "INSERTION";
+    private static final String GAG = "XMLContentProvider";
     private static String authority = "fr.will.xmlparser";
-    private BaseXML baseXML;
     SQLiteDatabase sqLiteDatabase;
+    private  BaseXML baseXML;
 
-    public static final String FEED_PATH = "XMLParser";
-    private static final int FEED_TABLE = 1;
-    private static final int FEED_LINK = 2;
-    private static final int FEED_DESCRIPTION = 3;
-    private static final int FEED_TITLE = 4;
+    public static final Uri CONTENT_URI = Uri.parse("content://com.will2.xmlparser.xmlcontentprovider");
+    public static final String CONTENT_PROVIDER_MIME = "vnd.android.cursor.item/vnd.will2.xmlparser.xmlcontentprovider";
+    public static final String FEED_TABLE = "FEED_TABLE";
 
-
-    private static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-    {
-        matcher.addURI(authority, FEED_PATH, FEED_TABLE);
-        matcher.addURI(authority, FEED_PATH, FEED_LINK);
-        matcher.addURI(authority, FEED_PATH, FEED_DESCRIPTION);
-        matcher.addURI(authority, FEED_PATH, FEED_TITLE);
-
-    }
 
     public XMLContentProvider() {
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        SQLiteDatabase database = baseXML.getWritableDatabase();
 
-        int code = matcher.match(uri);
-        int i;
-        long id = 0;
+        sqLiteDatabase = baseXML.getWritableDatabase();
+        int updateID = 0;
+        long id = getId(uri);
+
         String path;
+        try {
+            if (id > 0) {
+                updateID = sqLiteDatabase.delete(FEED_TABLE, selection, selectionArgs);
+            } else {
 
-        Log.d(TAG, "delete uri = " + uri.toString());
+                updateID = sqLiteDatabase.delete(FEED_TABLE, selection, selectionArgs);
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "delete uri = " + uri.toString());
+            throw new UnsupportedOperationException("Not yet implemented");
 
-        throw new UnsupportedOperationException("Not yet implemented");
+        } finally {
+            sqLiteDatabase.close();
+        }
+        return updateID;
     }
+
 
     @Override
     public String getType(Uri uri) {
-        // TODO: Implement this to handle requests for the MIME type of the data
-        // at the given URI.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return CONTENT_PROVIDER_MIME;
+    }
+
+
+    private long getId(Uri uri) {
+        String lastPathSegment = uri.getLastPathSegment();
+        if (lastPathSegment != null) {
+            try {
+                return Long.parseLong(lastPathSegment);
+            } catch (NumberFormatException e) {
+                Log.e("ContentProviderManager", "Number Format Exception : " + e.getMessage());
+            }
+        }
+        return -1;
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         sqLiteDatabase = baseXML.getWritableDatabase();
-        int code = matcher.match(uri);
-        Log.d(TAG, "Uri" + uri.toString());
-        long id;
-        String path;
-
-        switch (code) {
-
-            case FEED_LINK:
-                id = sqLiteDatabase.insert("feed_table", null, values);
-                path = FEED_PATH;
-                break;
-
-            case FEED_DESCRIPTION:
-                id = sqLiteDatabase.insert("feed_table", null, values);
-                path = FEED_PATH;
-                break;
-
-            case FEED_TITLE:
-                id = sqLiteDatabase.insert("feed_table", null, values);
-                path = FEED_PATH;
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Failed to insert ");
+        Uri insertUri = null;
+        long id = 0;
 
 
+        try {
+            id = sqLiteDatabase.insertOrThrow(FEED_TABLE, null, values);
+            Log.d(GAG, "id de l'insertion" + id);
+
+            if (id == -1) {
+                throw new RuntimeException("Echec de l'insertion");
+
+            } else {
+                insertUri = ContentUris.withAppendedId(uri, id);
+            }
+
+        } catch (Exception e) {
+            Log.e(GAG, "Insert Exception : " + e.getMessage());
+
+        } finally {
+            sqLiteDatabase.close();
         }
-        Uri.Builder builder = (new Uri.Builder()).authority(authority).appendPath(path);
 
-        return ContentUris.appendId(builder, id).build();
+
+        return insertUri;
     }
+
 
     @Override
     public boolean onCreate() {
-        baseXML.getInstance(getContext());
+        baseXML = BaseXML.getInstance(getContext());
         return true;
     }
 
@@ -105,18 +114,15 @@ public class XMLContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
 
+        long id = getId(uri);
+
         sqLiteDatabase = baseXML.getReadableDatabase();
-        int code = matcher.match(uri);
-        Cursor cursor;
-        switch (code) {
-            case FEED_LINK:
-                cursor = baseXML.getReadableDatabase().query("feed_table", projection, selection, selectionArgs, null, null, sortOrder);
+        if (id > 0) {
+            return sqLiteDatabase.query(FEED_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
 
-            default:
-                throw new UnsupportedOperationException("Not yet implemented");
-
+        } else {
+            return sqLiteDatabase.query(FEED_TABLE, projection, BaseXML.COLUMN_ID + " =" + id, selectionArgs, null, null, null);
         }
-
 
     }
 
@@ -124,27 +130,26 @@ public class XMLContentProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
 
-
-        long id = matcher.match(uri);
-
-        String path;
+        int cursor;
+        long id = getId(uri);
         sqLiteDatabase = baseXML.getWritableDatabase();
 
         try {
-            if (id < 0) {
-                int cursor = sqLiteDatabase.update(String.valueOf(XMLContentProvider.FEED_TABLE), values, selection, selectionArgs);
+            if (id > 0) {
+                cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, selection, selectionArgs);
             } else {
-                int cursor = sqLiteDatabase.update(String.valueOf(FEED_TABLE), values, BaseXML.COLUMN_ID + " =" + id, null);
+                cursor = sqLiteDatabase.update(XMLContentProvider.FEED_TABLE, values, BaseXML.COLUMN_ID + " =" + id, null);
             }
+        } catch (Exception e) {
+            Log.d(GAG, "Update = " + e.getMessage());
+
+            throw new UnsupportedOperationException("Not yet implemented");
 
         } finally {
             baseXML.close();
         }
 
-        throw new UnsupportedOperationException("Not yet implemented");
 
-
+        return cursor;
     }
-
-
 }

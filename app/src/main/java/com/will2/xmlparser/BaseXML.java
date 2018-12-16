@@ -11,7 +11,7 @@ class BaseXML extends SQLiteOpenHelper {
 
     private final static int VERSION = 1;
     public final static String DB_NAME = "XMLParser";
-    public final static String TABLE_FEED = "Feed";
+    public final static String TABLE_FEED = "FEED_TABLE";
     public final static String COLUMN_ID = "id";
     public final static String COLUMN_URL = "url";
     public final static String COLUMN_TITLE = "title";
@@ -39,12 +39,6 @@ class BaseXML extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FEED);
-        ContentValues row = new ContentValues();
-        row.put(BaseXML.COLUMN_TITLE, "parisien");
-        row.put(BaseXML.COLUMN_DESCRIPTION, "journal");
-        row.put(BaseXML.COLUMN_URL, "ContentValues row  = new ContentValues() ; \n" +
-                "    row.put(BaseXML.C)");
-
     }
 
     @Override

@@ -2,13 +2,13 @@ package com.will2.xmlparser;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,10 +16,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.URI;
@@ -32,11 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btnSearch;
     private RecyclerView rcvMain;
     private DocumentAdapter documentAdapter;
-    private FloatingActionButton fab;
-
     private String destinationFolder = "MPLRSS/";
-
-
+    private FloatingActionButton fab ;
     List<DocumentModel> items = new ArrayList<>();
     List<Long> referenceIds = new ArrayList<>();
     String fileName;
@@ -54,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         rcvMain = findViewById(R.id.rcvMain);
         fab = findViewById(R.id.fabSave);
 
+
         documentAdapter = new DocumentAdapter(this);
         rcvMain.setLayoutManager(new LinearLayoutManager(this));
         rcvMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -70,21 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (TextUtils.isEmpty(edtMain.getText().toString())){
-
-                    return;
-                }
-                else {
-
-
-                }
-            }
-        });
-
 
         registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)); // au moment ou le systeme aura une action de download complete alors cela va appeler le BR passée en parametre(fin de telechargement)
 
@@ -114,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Installing...", Toast.LENGTH_SHORT).show();
         }
 
-        if(idDownload > 0)
+        if (idDownload > 0)
             referenceIds.add(idDownload);
 
     }
@@ -129,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 if (documentAdapter != null) {
-                    items = XMLManager.ParseXML(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + destinationFolder + "/" + fileName); // chemin ou j'envoie mon doc telecharger sur mon telephone
-                    Toast.makeText(context, items.size()+"", Toast.LENGTH_SHORT).show();
+                    items = XMLManager.ParseXML(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + destinationFolder + "/" + fileName);
+                    Toast.makeText(context, items.size() + "", Toast.LENGTH_SHORT).show();
                     documentAdapter.resetData(items);
 
                 }
@@ -145,11 +128,32 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+    public void fabSaveClicked(View view){
 
+        for (DocumentModel item : items){
+            createFeed(item.link, item.title, item.description);
+        }
+
+    }
+
+    public void fabNextClicked(View view){
+        SaveURLActivity.launch(this);
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(broadcastReceiver);
+    }
+
+    public boolean createFeed(String url, String title, String description){
+        ContentValues values = new ContentValues();
+        values.put(BaseXML.COLUMN_URL, url);
+        values.put(BaseXML.COLUMN_TITLE, title);
+        values.put(BaseXML.COLUMN_DESCRIPTION, description);
+        Uri uri = getContentResolver().insert(XMLContentProvider.CONTENT_URI, values);
+
+        return uri != null;
+
     }
 }
