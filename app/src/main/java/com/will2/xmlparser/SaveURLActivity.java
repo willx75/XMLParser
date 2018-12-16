@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -20,10 +23,11 @@ import static com.will2.xmlparser.FeedColumn.COLUMN_URL;
 public class SaveURLActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
+    EditText edtRecherche;
     SaveURLAdapter saveURLAdapter;
     private static int REQUEST_URL;
-    List<Feed> feedList;
     public static String EXTRA = "Url is saved";
+    List<Feed> searchFeed = new ArrayList<>();
 
     public static void launch(MainActivity activity) {
         activity.startActivityForResult(new Intent(activity, SaveURLActivity.class), REQUEST_URL);
@@ -36,7 +40,7 @@ public class SaveURLActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_save_url);
         recyclerView = findViewById(R.id.rcvSaveURL);
-
+        edtRecherche = findViewById(R.id.edtRecherche);
 
         saveURLAdapter = new SaveURLAdapter(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -44,6 +48,31 @@ public class SaveURLActivity extends AppCompatActivity {
         recyclerView.setAdapter(saveURLAdapter);
 
 
+
+        edtRecherche.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence search, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                searchFeed.clear();
+                String search = edtRecherche.getText().toString();
+                for(Feed feed : getFeeds()){
+                    if(feed.getTitle().contains(search) || feed.getContent().contains(search) || feed.getDescription().contains(search)){
+                        searchFeed.add(feed);
+                    }
+                }
+
+                saveURLAdapter.setUrls(searchFeed);
+            }
+        });
     }
 
     @Override

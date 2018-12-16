@@ -2,5 +2,6 @@
     <string name="app_name">XMLParser</string>
     <string name="downloading_label">Téléchargement en cours ...</string>
     <string name="search">Search</string>
+    <string name="recherche">Recherche</string>
 
 </resources>
