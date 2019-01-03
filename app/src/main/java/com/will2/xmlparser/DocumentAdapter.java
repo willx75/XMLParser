@@ -54,6 +54,7 @@ class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.DocumentHolde
 
         documentHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
+            // permettant a ce que lorsque l'on appuie sur un element de la recyclerview cela puisse afficher et se rabattre
             public void onClick(View v) {
                 if(documentHolder.txvLink.getVisibility() == View.VISIBLE){
                     documentHolder.txvLink.setVisibility(View.GONE);

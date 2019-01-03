@@ -25,18 +25,21 @@ public class XMLManager {
         List<DocumentModel> list = new ArrayList<>();
 
         /**
-         * creation d'un file rss avec documentBuilderFactory
+         * creation d'un file rss avec documentBuilderFactory en donnant le file rss que je viens de dl
+         * creation des instances de DB qui permettront de parcourir le doc XML dl
          */
         File rssFile = new File(path);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
         Document document = documentBuilder.parse(rssFile);
 
+        // Pour remettre le XM en forme au cas ou il est mal formé
         document.getDocumentElement().normalize();
 
         Log.d(Tag, "ROOT ELEMENT : " + document.getDocumentElement().getNodeName());
 
         //on prend le 1e element channel dans mon docu rss/ il y a qu'un "channel" dans chaque document rss
+        //car channel contient la liste des items/articles
         Element nodeChannel = (Element) document.getElementsByTagName("channel").item(0);
 
 
@@ -45,6 +48,7 @@ public class XMLManager {
 
         //creation d'une nodeListe d'item qui englobe chaque item de mon doc rss
         NodeList itemsNode = nodeChannel.getElementsByTagName("item");
+
         /**
          *on boucle pour recuperer tout les items, si tout ls element items sont present on les
          mets dans la Node puis on les ajoutent
@@ -57,6 +61,10 @@ public class XMLManager {
                 final Element element = (Element) node;
 
                 Log.d(Tag, "ELEMENT TITLE : " + element.getElementsByTagName("title").item(0).getTextContent());
+                /**
+                 * On est sur que chaque element est un article du coup je cree un docModel et je recupere les infos
+                 * pour les afficher à l'ecran
+                 */
                 list.add(new DocumentModel() {
                     {
                         //Chaque doc rss commencent pas title,description,link

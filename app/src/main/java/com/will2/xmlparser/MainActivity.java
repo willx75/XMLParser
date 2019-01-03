@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rcvMain;
     private DocumentAdapter documentAdapter;
     private String destinationFolder = "MPLRSS/";
-    private FloatingActionButton fab ;
+    private FloatingActionButton fab;
     List<DocumentModel> items = new ArrayList<>();
     List<Long> referenceIds = new ArrayList<>();
     String fileName;
@@ -89,16 +89,24 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = Uri.parse(url);
 
         DownloadManager.Request request = new DownloadManager.Request(uri); // cree la requete de telechargemnt cela va demarrer le dl
+        // requete pour appliquer le type de telechargement compatible
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE | DownloadManager.Request.NETWORK_WIFI);
 
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE | DownloadManager.Request.NETWORK_WIFI); // requete pour appliquer le type de telechargement compatible
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE); // pour voir la notification & pourcentage de telechargement
+        // pour voir la notification & pourcentage de telechargement
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
         request.setTitle(getString(R.string.downloading_label));
-        request.setVisibleInDownloadsUi(true); // afficher dans le telechargement systeme
-        fileName = uri.getLastPathSegment(); // je recupère la derniere partie de l'url
+
+        // afficher dans le telechargement systeme
+        request.setVisibleInDownloadsUi(true);
+
+        // je recupère la derniere partie de l'url
+        fileName = uri.getLastPathSegment();
         request.setDestinationInExternalPublicDir(destinationFolder, fileName);// creation a la racine
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         if (downloadManager != null) {
-            idDownload = downloadManager.enqueue(request); // ajouter le dl a la file d'attente une fois que le systeme le rend bon de le telecharger(ca marche comme une file)
+
+            // ajouter le dl a la file d'attente une fois que le systeme le rend bon de le telecharger(ca marche comme une file)
+            idDownload = downloadManager.enqueue(request);
             Toast.makeText(this, "Installing...", Toast.LENGTH_SHORT).show();
         }
 
@@ -106,6 +114,9 @@ public class MainActivity extends AppCompatActivity {
             referenceIds.add(idDownload);
 
     }
+
+
+    // BR ecouter qd le dl est terminée
 
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -118,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if (documentAdapter != null) {
                     items = XMLManager.ParseXML(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + destinationFolder + "/" + fileName);
-                    Toast.makeText(context, items.size() + "", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(context, items.size() + "", Toast.LENGTH_SHORT).show();
                     documentAdapter.resetData(items);
 
                 }
@@ -133,12 +144,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-    public void fabSaveClicked(View view){
+
+    public void fabSaveClicked(View view) {
 
         new Handler().post(new Runnable() {
             @Override
             public void run() {
-                for (DocumentModel item : items){
+                for (DocumentModel item : items) {
                     createFeed(item.link, item.title, item.description);
                 }
             }
@@ -146,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void fabNextClicked(View view){
+    public void fabNextClicked(View view) {
         SaveURLActivity.launch(this);
     }
 
@@ -156,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(broadcastReceiver);
     }
 
-    public boolean createFeed(String url, String title, String description){
+    public boolean createFeed(String url, String title, String description) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_URL, url);
         values.put(COLUMN_TITLE, title);

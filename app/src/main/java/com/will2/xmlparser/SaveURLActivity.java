@@ -11,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,7 @@ public class SaveURLActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     EditText edtRecherche;
     SaveURLAdapter saveURLAdapter;
-    private static int REQUEST_URL;
+    private static int REQUEST_URL ;
     public static String EXTRA = "Url is saved";
     List<Feed> searchFeed = new ArrayList<>();
 

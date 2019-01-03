@@ -21,19 +21,21 @@ import static com.will2.xmlparser.FeedColumn.COLUMN_ID;
 public class XMLContentProvider extends ContentProvider {
 
 
-    //2 URI de notre content provider, elle sera utilisé pour accéder au ContentProvider
+    // URI de notre content provider, elle sera utilisé pour accéder au ContentProvider
     public static final Uri CONTENT_URI = Uri.parse("content://com.will2.xmlparser.xmlcontentprovider");
+
     // Le Mime de notre content provider, la premiére partie est toujours identique
     public static final String CONTENT_PROVIDER_MIME = "vnd.android.cursor.item/vnd.will2.xmlparser.xmlcontentprovider";
+
     public static final String TABLE_FEED = "FEED";
     private static String DATABASE_NAME = "xmlparser.db";
     private static final int DATABASE_VERSION = 1;
 
 
-    //3 Creation d'une inner class qui va gérer la base de donnée locale
+    // Creation d'une inner class qui va gérer la base de donnée locale
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
-        //4 Commande sql pour la création de la base de données
+        // Commande sql pour la création de la base de données
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_FEED + "(\n" +
                 ""
                 + FeedColumn.COLUMN_ID + " INTEGER primary key autoincrement,\n" +
@@ -45,7 +47,7 @@ public class XMLContentProvider extends ContentProvider {
                 + FeedColumn.COLUMN_DESCRIPTION + " TEXT)";
 
 
-        //5 Constructeur du SqlManager à partir du context, du nom de la base et de la version
+        // Constructeur du SqlManager à partir du context, du nom de la base et de la version
         public DatabaseHelper(Context context){
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -62,11 +64,11 @@ public class XMLContentProvider extends ContentProvider {
         }
     }
 
-    //6 Creer une variable SqlManager
+    // Creer une variable SqlManager
     private DatabaseHelper dbHelper;
 
 
-    //7 instancier le dbHelper dans le OnCreate du ContentProvider
+    // instancier le dbHelper dans le OnCreate du ContentProvider
     @Override
     public boolean onCreate() {
         dbHelper = new DatabaseHelper(getContext());
@@ -74,15 +76,16 @@ public class XMLContentProvider extends ContentProvider {
     }
 
 
-    //8 retourne le type de notre ContentProvider,ce qui correspond tout simplement à notre MIME
+    // retourne le type de notre ContentProvider,ce qui correspond tout simplement à notre MIME
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
         return CONTENT_PROVIDER_MIME;
     }
 
-    //9 Cette méthode nous permet de récupérer l’id de notre Uri
+    // Cette méthode nous permet de récupérer l’id de notre Uri
     private long getId(Uri uri){
+
         //Vu que les uri sont ecrit de cette façon Content://something/id alors je recupère la derniere partie de l'uri pour avoir l'id
         String lastPathSegment = uri.getLastPathSegment();
         if (lastPathSegment != null) {
@@ -95,8 +98,15 @@ public class XMLContentProvider extends ContentProvider {
         return -1;
     }
 
+    // rajoute une valeur dans notre ContentProvider
     @Nullable
     @Override
+
+    /**
+     * On commence par récupérer une instance de la base de données en mode ecriture.
+     * Puis on insère nos données à l’aide de la méthode insertOrThrow qui retourne l’id de l’insertion dans la base et -1 en cas d’échec de l’insertion.
+     * Sans oublier de fermer la connexion à la base de données quelques soit le resultat.
+     */
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
         //récupérer une instance de la base de données en mode ecriture
         SQLiteDatabase sqLiteDatabase = dbHelper.getWritableDatabase();
@@ -147,6 +157,19 @@ public class XMLContentProvider extends ContentProvider {
 
         return updateId;
     }
+
+    /**
+     *
+     * @param uri
+     * @param contentValues
+     * @param s
+     * @param strings
+     * @return
+     * On récupérer l’id de l’élément
+     * Si l’id est supérieur à 0, on met à jour l’élément
+     * Sinon on essaye à mettre à jour l’élement par sa valeur.
+     * Sans oublier de fermer la base à la fin
+     */
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
